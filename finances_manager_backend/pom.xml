@@ -8,10 +8,10 @@
 		<version>3.2.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.financesmanagergroup</groupId>
-	<artifactId>finances_manager</artifactId>
+	<groupId>com.filescompressorgroup</groupId>
+	<artifactId>files_compressor</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>finances_manager</name>
+	<name>files_compressor</name>
 	<description>Projeto da disciplina de Estrutura de Dados I - UFERSA</description>
 	<properties>
 		<java.version>17</java.version>

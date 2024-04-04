@@ -40,11 +40,6 @@ public class FileStorageService {
 		Path compressedPath = Paths.get("C:/FilesFinancesManagerED/CompressedFiles").toAbsolutePath().normalize();
 		Path decodedPath = Paths.get("C:/FilesFinancesManagerED/DecodedFiles").toAbsolutePath().normalize();
 		
-		// trocando da pasta que ficam os arquivos que foram salvos para a pasta que está
-		// os arquivos compactados.
-		//Path path = Paths.get("C:\\FilesFinancesManagerED\\CompressedFiles")
-		//		.toAbsolutePath().normalize();
-
 		this.fileStorageLocation = path;
 		this.compressedFileStorageLocation = compressedPath;
 		this.decodedFileStorageLocation = decodedPath;
@@ -87,7 +82,7 @@ public class FileStorageService {
 						"Sorry! Filename contains invalid path sequence " + filename);
 			}
 			Path targetLocation = this.compressedFileStorageLocation.resolve(filename);
-			Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+			//Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
 			String decompressedFilename = decompressFile(filename, targetLocation);
 			
@@ -99,32 +94,7 @@ public class FileStorageService {
 	}
 	
 	
-	/*public String storeFile(MultipartFile file) {
-		String filename = StringUtils.cleanPath(file.getOriginalFilename());
-		try {
-			// Filename..txt
-			if (filename.contains("..")) {
-				throw new FileStorageException(
-						"Sorry! Filename contains invalid path sequence " + filename);
-			}
-			Path targetLocation = this.fileStorageLocation.resolve(filename);
-			Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-
-			compressFile(filename, targetLocation);
-			
-			return filename;
-		} catch (Exception e) {
-			throw new FileStorageException(
-					"Could not store file " + filename + ". Please try again!", e);
-		}
-	}*/
-
 	public Resource loadCompressedFileAsResource(String filename) {
-		// arquivo quando decodificado esta com a quantidade de paginas do arquivo
-		// original porém está com o conteúdo em branco, minha suspeita é que para que
-		// funcione, todas as classes de Node depende, devem implementar também
-		// serializable(outra ideia observar se o decoder funciona assim que usa o encoder
-		// para saber aonde pode estar o problema)
 		System.out.println("O filename no loadFileAsResource é: " + filename);
 		try {
 			Path filePath = this.compressedFileStorageLocation.resolve
@@ -156,11 +126,6 @@ public class FileStorageService {
 	
 	
 	public Resource loadDecompressedFileAsResource(String filename) {
-		// arquivo quando decodificado esta com a quantidade de paginas do arquivo
-		// original porém está com o conteúdo em branco, minha suspeita é que para que
-		// funcione, todas as classes de Node depende, devem implementar também
-		// serializable(outra ideia observar se o decoder funciona assim que usa o encoder
-		// para saber aonde pode estar o problema)
 		System.out.println("O filename no loadFileAsResource2 é: " + filename);
 		try {
 			
@@ -204,21 +169,25 @@ public class FileStorageService {
 		Path encodedFilePath = this.compressedFileStorageLocation.resolve
 				(filename).normalize();
 		
-		
-		
+		System.out.println("filename em decompressFile: " + filename);
+        String onlyFilename = filename.replace("_compressed.bin", "");
+        System.out.println("onlyFilename em decompressFile: " + onlyFilename);
+        
+        // decodificando o arquivo e colocando o .txt
 		String decodePathDestination = "C:/FilesFinancesManagerED/DecodedFiles/"
-				+ filename;
+				+ onlyFilename + ".txt";
 		
 		Path decodedFilePath = this.decodedFileStorageLocation.resolve
 				(decodePathDestination).normalize();
 		
-		Node root = desearializeNodeRoot(filename);
+		Node root = desearializeNodeRoot(onlyFilename);
 		FileEnconding.decodeFile(encodedFilePath.toString(), decodedFilePath.toString(), root);
 		
 		//Resource resource = new UrlResource(decodedFilePath.toUri());
 		
 		//serializeNodeRoot(root, onlyFilename);
-		String onlyFilename = getFileNameOnly(filename);
+		
+		// como o interesse é um .txt, acrescenta-se .txt na frente
 		String fullFilename = onlyFilename + ".txt";
 		
 		return fullFilename;
@@ -277,7 +246,7 @@ public class FileStorageService {
 			}
 		}
 
-		// removendo a extensão do arquivo para obter somente o nome com o .
+		// removendo a extensão do arquivo para obter somente o nome
 		String onlyFilename = filename.substring(0, dotIndex);
 		System.out.println("Nome do arquivo:" + onlyFilename);
 		
@@ -325,4 +294,25 @@ public class FileStorageService {
 			throw new Exception("The specified path is not a valid directory.");
 		}
 	}
+	
+	
+	/*public String storeFile(MultipartFile file) {
+	String filename = StringUtils.cleanPath(file.getOriginalFilename());
+	try {
+		// Filename..txt
+		if (filename.contains("..")) {
+			throw new FileStorageException(
+					"Sorry! Filename contains invalid path sequence " + filename);
+		}
+		Path targetLocation = this.fileStorageLocation.resolve(filename);
+		Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+
+		compressFile(filename, targetLocation);
+		
+		return filename;
+	} catch (Exception e) {
+		throw new FileStorageException(
+				"Could not store file " + filename + ". Please try again!", e);
+	}
+}*/
 }

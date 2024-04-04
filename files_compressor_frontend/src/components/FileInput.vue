@@ -10,7 +10,7 @@
           :show-size="1000"
           color="var(--primary-color)"
           label="Selecione ou arraste arquivos"
-          placeholder="Seleciona os arquivos"
+          placeholder="Selecione os arquivos"
           prepend-icon="mdi-paperclip"
           variant="outlined"
           counter
@@ -110,7 +110,7 @@ const sendFiles = async () => {
 
   if (props.action == "decompress") {
     let decompressedFile = await decompressFile();
-    console.log("O nome de compressedFile é: " + decompressedFile.fileName)
+    console.log("O nome de decompressedFile é: " + decompressedFile.fileName)
     if(decompressedFile.fileName != "") {
       
       downloadDecompressedFile(decompressedFile);
@@ -164,7 +164,7 @@ const decompressFile = async () => {
 };
   try {
     const response = await axios.post(
-      "http://localhost:8082/api/file/v1/compressFile",
+      "http://localhost:8082/api/file/v1/decompressFile",
       formData,
       {
         headers: {
