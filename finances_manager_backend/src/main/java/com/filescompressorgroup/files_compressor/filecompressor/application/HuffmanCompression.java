@@ -1,6 +1,5 @@
 package com.filescompressorgroup.files_compressor.filecompressor.application;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 import com.filescompressorgroup.files_compressor.filecompressor.entities.Node;
@@ -39,10 +38,15 @@ public class HuffmanCompression {
 	        Node parent = new Node('\0', left.getFrequency() + right.getFrequency());
 	        parent.setLeft(left);
 	        parent.setRight(right);
-	        // Substitui os dois primeiros Nodes pelos pais na árvore
-	        nodes[0] = parent;
-	        // Reduz o tamanho do array
-	        nodes = Arrays.copyOfRange(nodes, 1, nodes.length);
+
+	        // Cria um novo array com tamanho reduzido para armazenar os nós restantes
+	        Node[] newNodes = new Node[nodes.length - 1];
+	        newNodes[0] = parent; // Adiciona o nó pai na primeira posição
+	        for (int i = 1; i < newNodes.length; i++) {
+	            newNodes[i] = nodes[i + 1]; // Copia os nós restantes para o novo array
+	        }
+	        nodes = newNodes; // Atualiza o array de nós para o novo array reduzido
+
 	        // Reordena o array
 	        shellSort(nodes);
 	    }
@@ -51,18 +55,31 @@ public class HuffmanCompression {
 	    return nodes[0];
 	}
 
+
 	// Implementação do algoritmo de ordenação Shell Sort
 	private static void shellSort(Node[] nodes) {
 	    int n = nodes.length;
+	    Node[] temp = new Node[n]; // Array temporário para armazenar cópias dos nós
+
+	    for (int i = 0; i < n; i++) {
+	        temp[i] = nodes[i]; // Copia os nós para o array temporário
+	    }
+
+	    // Algoritmo Shell Sort
 	    for (int gap = n / 2; gap > 0; gap /= 2) {
 	        for (int i = gap; i < n; i++) {
-	            Node temp = nodes[i];
+	            Node tempNode = temp[i];
 	            int j;
-	            for (j = i; j >= gap && nodes[j - gap].getFrequency() > temp.getFrequency(); j -= gap) {
-	                nodes[j] = nodes[j - gap];
+	            for (j = i; j >= gap && temp[j - gap].getFrequency() > tempNode.getFrequency(); j -= gap) {
+	                temp[j] = temp[j - gap];
 	            }
-	            nodes[j] = temp;
+	            temp[j] = tempNode;
 	        }
+	    }
+
+	    // Copia os nós ordenados de volta para o array original
+	    for (int i = 0; i < n; i++) {
+	        nodes[i] = temp[i];
 	    }
 	}
 
