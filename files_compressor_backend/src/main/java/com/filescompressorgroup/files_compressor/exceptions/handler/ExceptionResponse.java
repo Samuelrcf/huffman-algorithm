@@ -1,7 +1,6 @@
 package com.filescompressorgroup.files_compressor.exceptions.handler;
 
 import java.io.Serializable;
-import java.util.List;
 
 public class ExceptionResponse implements Serializable {
 	private static final long serialVersionUID = 1L;
