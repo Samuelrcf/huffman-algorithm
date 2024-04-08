@@ -92,32 +92,25 @@ const props = defineProps({
   },
 });
 
-onMounted(() => {
-  findAllFiles();
-});
-
 const files = ref([]);
 
 const sendFiles = async () => {
   if (props.action == "compress") {
     let compressedFile = await compressFile();
-    console.log("O nome de compressedFile é: " + compressedFile.fileName)
-    if(compressedFile.fileName != "") {
-      
+    console.log("O nome de compressedFile é: " + compressedFile.fileName);
+    if (compressedFile.fileName != "") {
       downloadCompressedFile(compressedFile);
     }
   }
 
   if (props.action == "decompress") {
     let decompressedFile = await decompressFile();
-    console.log("O nome de decompressedFile é: " + decompressedFile.fileName)
-    if(decompressedFile.fileName != "") {
-      
+    console.log("O nome de decompressedFile é: " + decompressedFile.fileName);
+    if (decompressedFile.fileName != "") {
       downloadDecompressedFile(decompressedFile);
     }
   }
 };
-
 
 const compressFile = async () => {
   const formData = new FormData();
@@ -128,8 +121,8 @@ const compressFile = async () => {
     fileName: "",
     fileDownloadUri: "",
     fileType: "",
-    fileSize: 0
-};
+    fileSize: 0,
+  };
   try {
     const response = await axios.post(
       "http://localhost:8082/api/file/v1/compressFile",
@@ -149,8 +142,6 @@ const compressFile = async () => {
   }
 };
 
-
-
 const decompressFile = async () => {
   const formData = new FormData();
   files.value.forEach((file: any) => {
@@ -160,8 +151,8 @@ const decompressFile = async () => {
     fileName: "",
     fileDownloadUri: "",
     fileType: "",
-    fileSize: 0
-};
+    fileSize: 0,
+  };
   try {
     const response = await axios.post(
       "http://localhost:8082/api/file/v1/decompressFile",
@@ -181,9 +172,7 @@ const decompressFile = async () => {
   }
 };
 
-
-const allFiles = reactive<any[]>([]);
-
+//const allFiles = reactive<any[]>([]);
 
 async function downloadCompressedFile(item: FileInfoInterface) {
   try {
@@ -209,7 +198,6 @@ async function downloadCompressedFile(item: FileInfoInterface) {
   }
 }
 
-
 async function downloadDecompressedFile(item: FileInfoInterface) {
   try {
     const response = await axios.get(
@@ -233,47 +221,6 @@ async function downloadDecompressedFile(item: FileInfoInterface) {
     console.error("Erro ao baixar o arquivo:", error);
   }
 }
-
-async function downloadFile(item: any) {
-  try {
-    const response = await axios.get(
-      `http://localhost:8082/api/file/v1/downloadFile/${item.fileName}`,
-      {
-        responseType: "blob", // Define o tipo de resposta como blob
-      }
-    );
-
-    // Cria um link temporário para o arquivo
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "arquivoBinCompactado.txt"); // Nome do arquivo para download
-    //link.setAttribute('download', "arquivoEmPdf.pdf");
-    document.body.appendChild(link);
-    link.click();
-    // Limpa o objeto URL criado
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error("Erro ao baixar o arquivo:", error);
-  }
-}
-
-const findAllFiles = async () => {
-  try {
-    const response = await axios.get(
-      "http://localhost:8082/api/file/v1/findAllFiles",
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    console.log(response.data[0]);
-    allFiles.push(...response.data);
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
 
 /*const uploadFiles = async () => {
   const formData = new FormData();

@@ -10,7 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class FileStorageService {
 		Path path = Paths.get(fileStorageConfig.getUploadDir()).toAbsolutePath().normalize();
 		Path compressedPath = Paths.get("C:/FilesFinancesManagerED/CompressedFiles").toAbsolutePath().normalize();
 		Path decodedPath = Paths.get("C:/FilesFinancesManagerED/DecodedFiles").toAbsolutePath().normalize();
-		
+
 		this.fileStorageLocation = path;
 		this.compressedFileStorageLocation = compressedPath;
 		this.decodedFileStorageLocation = decodedPath;
@@ -47,8 +47,8 @@ public class FileStorageService {
 		try {
 			Files.createDirectories(this.fileStorageLocation);
 		} catch (Exception e) {
-			throw new FileStorageException(
-					"Could not create the directory where the uploaded files will be stored!", e);
+			throw new FileStorageException("Could not create the directory where the uploaded files will be stored!",
+					e);
 		}
 	}
 
@@ -57,60 +57,54 @@ public class FileStorageService {
 		try {
 			// Filename..txt
 			if (filename.contains("..")) {
-				throw new FileStorageException(
-						"Sorry! Filename contains invalid path sequence " + filename);
+				throw new FileStorageException("Sorry! Filename contains invalid path sequence " + filename);
 			}
 			Path targetLocation = this.fileStorageLocation.resolve(filename);
 			Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
 			String compressedFilename = compressFile(filename, targetLocation);
-			
+
 			return compressedFilename;
 		} catch (Exception e) {
-			throw new FileStorageException(
-					"Could not store file " + filename + ". Please try again!", e);
+			throw new FileStorageException("Could not store file " + filename + ". Please try again!", e);
 		}
 	}
-	
-	
+
 	public String decompress(MultipartFile file) {
 		String filename = StringUtils.cleanPath(file.getOriginalFilename());
 		try {
 			// Filename..txt
 			if (filename.contains("..")) {
-				throw new FileStorageException(
-						"Sorry! Filename contains invalid path sequence " + filename);
+				throw new FileStorageException("Sorry! Filename contains invalid path sequence " + filename);
 			}
 			Path targetLocation = this.compressedFileStorageLocation.resolve(filename);
-			//Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+			// Files.copy(file.getInputStream(), targetLocation,
+			// StandardCopyOption.REPLACE_EXISTING);
 
 			String decompressedFilename = decompressFile(filename, targetLocation);
-			
+
 			return decompressedFilename;
 		} catch (Exception e) {
-			throw new FileStorageException(
-					"Could not store file " + filename + ". Please try again!", e);
+			throw new FileStorageException("Could not store file " + filename + ". Please try again!", e);
 		}
 	}
-	
-	
+
 	public Resource loadCompressedFileAsResource(String filename) {
 		System.out.println("O filename no loadFileAsResource é: " + filename);
 		try {
-			Path filePath = this.compressedFileStorageLocation.resolve
-					(filename).normalize();
-			
-			//String decodePathDestination = "C:/FilesFinancesManagerED/DecodedFiles/"
-			//		+ filename;
-			
-			//Path decodedFilePath = this.decodedFileStorageLocation.resolve
-			//		(decodePathDestination).normalize();
-			
-			//Node root = desearializeNodeRoot(filename);
-			//FileEnconding.decodeFile(filePath.toString(), decodedFilePath.toString(), root);
-			
-			
-			//Resource resource = new UrlResource(decodedFilePath.toUri());
+			Path filePath = this.compressedFileStorageLocation.resolve(filename).normalize();
+
+			// String decodePathDestination = "C:/FilesFinancesManagerED/DecodedFiles/"
+			// + filename;
+
+			// Path decodedFilePath = this.decodedFileStorageLocation.resolve
+			// (decodePathDestination).normalize();
+
+			// Node root = desearializeNodeRoot(filename);
+			// FileEnconding.decodeFile(filePath.toString(), decodedFilePath.toString(),
+			// root);
+
+			// Resource resource = new UrlResource(decodedFilePath.toUri());
 			Resource resource = new UrlResource(filePath.toUri());
 			System.out.println("resource é: " + resource);
 
@@ -123,15 +117,13 @@ public class FileStorageService {
 			throw new MyFileNotFoundException("File not found" + filename, e);
 		}
 	}
-	
-	
+
 	public Resource loadDecompressedFileAsResource(String filename) {
 		System.out.println("O filename no loadFileAsResource2 é: " + filename);
 		try {
-			
-			Path filePath2 = this.decodedFileStorageLocation.resolve
-					(filename).normalize();
-			
+
+			Path filePath2 = this.decodedFileStorageLocation.resolve(filename).normalize();
+
 			Resource resource = new UrlResource(filePath2.toUri());
 			System.out.println("O nome do arquivo descompactado é: " + resource.getFilename());
 
@@ -145,8 +137,86 @@ public class FileStorageService {
 		}
 	}
 
-
 	
+	public List<File> findAllCompressedFilesInFolder(File folder) throws Exception {
+		if (folder.isDirectory()) {
+			File[] files = folder.listFiles();
+
+			if (files != null) {
+				List<File> foundedFiles = new LinkedList<>();
+
+				for (File file : files) {
+					foundedFiles.add(file);
+				}
+				return foundedFiles;
+			} else {
+				throw new Exception("The directory is empty.");
+			}
+		} else {
+			throw new Exception("The specified path is not a valid directory.");
+		}
+	}
+
+	public List<FilePresentation> findAllCompressedFiles() throws Exception {
+		File folder = new File(this.compressedFileStorageLocation.toString());
+		
+		List<File> files = findAllCompressedFilesInFolder(folder);
+
+		List<FilePresentation> filesPresentations = new LinkedList<>();
+		for (File file : files) {
+			String fileName = file.getName();
+
+			FilePresentation filePresentation = new FilePresentation();
+			filePresentation.setFileName(fileName);
+
+			filesPresentations.add(filePresentation);
+		}
+		
+		return filesPresentations;
+	}
+	
+	
+	
+	// Metodo interessante, pois ele vai ficar se chamando caso haja uma pasta com o nome do proprio arquivo
+	// quando o arquivo não for um diretorio ele vai buscar esse arquivo e retornar. É uma especie de
+	// recursividade
+    public File findFileByFilename(File folder, String filename) throws Exception {
+        List<File> files = findAllCompressedFilesInFolder(folder);
+
+        if (files != null && folder.isDirectory()) {
+            for (File file : files) {
+                if (file.getName().equals(filename)) {
+                    return file;
+                }
+                
+                if (file.isDirectory()) {
+                    File foundedFile = findFileByFilename(file, filename);
+                    if (foundedFile != null) {
+                        return foundedFile;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+	
+	
+	
+
+	public boolean deleteCompressedFile(String filename) throws Exception {
+		File folder = new File(this.compressedFileStorageLocation.toString());
+		
+		File foundedFile = findFileByFilename(folder, filename);
+		
+		if(foundedFile != null) {
+            if (foundedFile.delete()) {
+                return true;
+            }
+		}
+		
+		return false;
+	}
+
 	public String compressFile(String filename, Path targetLocation) throws IOException {
 		String encodedBinaryFilePath = "C:/FilesFinancesManagerED/CompressedFiles/";
 
@@ -154,83 +224,75 @@ public class FileStorageService {
 
 		String fullFilename = onlyFilename + "_compressed.bin";
 		encodedBinaryFilePath = encodedBinaryFilePath + fullFilename;
-		
+
 		System.out.println("O path completo de encodedBinaryFilePath é: " + encodedBinaryFilePath);
 
 		Node root = FileEnconding.encodeFile(targetLocation.toString(), encodedBinaryFilePath);
-		
+
 		serializeNodeRoot(root, onlyFilename);
-		
+
 		return fullFilename;
 	}
-	
-	
+
 	public String decompressFile(String filename, Path targetLocation) throws Exception {
-		Path encodedFilePath = this.compressedFileStorageLocation.resolve
-				(filename).normalize();
-		
+		Path encodedFilePath = this.compressedFileStorageLocation.resolve(filename).normalize();
+
 		System.out.println("filename em decompressFile: " + filename);
-        String onlyFilename = filename.replace("_compressed.bin", "");
-        System.out.println("onlyFilename em decompressFile: " + onlyFilename);
-        
-        // decodificando o arquivo e colocando o .txt
-		String decodePathDestination = "C:/FilesFinancesManagerED/DecodedFiles/"
-				+ onlyFilename + ".txt";
-		
-		Path decodedFilePath = this.decodedFileStorageLocation.resolve
-				(decodePathDestination).normalize();
-		
+		String onlyFilename = filename.replace("_compressed.bin", "");
+		System.out.println("onlyFilename em decompressFile: " + onlyFilename);
+
+		// decodificando o arquivo e colocando o .txt
+		String decodePathDestination = "C:/FilesFinancesManagerED/DecodedFiles/" + onlyFilename + ".txt";
+
+		Path decodedFilePath = this.decodedFileStorageLocation.resolve(decodePathDestination).normalize();
+
 		Node root = desearializeNodeRoot(onlyFilename);
 		FileEnconding.decodeFile(encodedFilePath.toString(), decodedFilePath.toString(), root);
-		
-		//Resource resource = new UrlResource(decodedFilePath.toUri());
-		
-		//serializeNodeRoot(root, onlyFilename);
-		
+
+		// Resource resource = new UrlResource(decodedFilePath.toUri());
+
+		// serializeNodeRoot(root, onlyFilename);
+
 		// como o interesse é um .txt, acrescenta-se .txt na frente
 		String fullFilename = onlyFilename + ".txt";
-		
+
 		return fullFilename;
 	}
-	
-	
+
 	public void serializeNodeRoot(Node root, String onlyFilename) {
-        try {
-        	String fullFileName = "C:/FilesFinancesManagerED/SerializedObjects/Root" 
-        			+ onlyFilename + ".ser";
-        	System.out.println("Path do root: " + fullFileName);
-        	
-            FileOutputStream fileOut = new FileOutputStream(fullFileName);
-            ObjectOutputStream out = new ObjectOutputStream(fileOut);
-            
-            out.writeObject(root);
-            out.close();
-            fileOut.close();
-            
-            System.out.println("Objeto serializado em " + fullFileName);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+		try {
+			String fullFileName = "C:/FilesFinancesManagerED/SerializedObjects/Root" + onlyFilename + ".ser";
+			System.out.println("Path do root: " + fullFileName);
+
+			FileOutputStream fileOut = new FileOutputStream(fullFileName);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+
+			out.writeObject(root);
+			out.close();
+			fileOut.close();
+
+			System.out.println("Objeto serializado em " + fullFileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
-	
-	
+
 	public Node desearializeNodeRoot(String onlyFilename) throws Exception {
-        try {
-            FileInputStream fileIn = new FileInputStream
-            		("C:/FilesFinancesManagerED/SerializedObjects/Root" 
-            				+ onlyFilename + ".ser");
-            ObjectInputStream in = new ObjectInputStream(fileIn);
-            Node root = (Node) in.readObject();
-            in.close();
-            fileIn.close();
-            System.out.println("Objeto desserializado:");
-            
-            return root;
-        } catch (IOException | ClassNotFoundException e) {
-            throw new Exception("Erro ao desserializar objeto", e);
-        }
+		try {
+			FileInputStream fileIn = new FileInputStream(
+					"C:/FilesFinancesManagerED/SerializedObjects/Root" + onlyFilename + ".ser");
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			Node root = (Node) in.readObject();
+			in.close();
+			fileIn.close();
+			System.out.println("Objeto desserializado:");
+
+			return root;
+		} catch (IOException | ClassNotFoundException e) {
+			throw new Exception("Erro ao desserializar objeto", e);
+		}
 	}
-	
+
 	public String getFileNameOnly(String filename) {
 		int filenameSize = filename.length();
 
@@ -249,70 +311,7 @@ public class FileStorageService {
 		// removendo a extensão do arquivo para obter somente o nome
 		String onlyFilename = filename.substring(0, dotIndex);
 		System.out.println("Nome do arquivo:" + onlyFilename);
-		
+
 		return onlyFilename;
 	}
-	
-	
-	public List<FilePresentation> findAll() throws Exception {
-		// Path to the directory you want to list files from
-		String directory = "C:/FilesFinancesManagerED/Files";
-
-		// Create a File object representing the directory
-		File folder = new File(directory);
-
-		// Check if it's a valid directory
-		if (folder.isDirectory()) {
-			// List all files in the directory
-			File[] files = folder.listFiles();
-
-			// Check if the list is not empty
-			if (files != null) {
-				List<FilePresentation> filesPresentations = new ArrayList<>();
-
-				for (File file : files) {
-					String fileName = file.getName();
-
-					FilePresentation filePresentation = new FilePresentation();
-					filePresentation.setFileName(fileName);
-
-					filesPresentations.add(filePresentation);
-				}
-
-				// Print the list of file names
-				System.out.println("File names:");
-				for (FilePresentation fileName : filesPresentations) {
-					System.out.println(fileName.getFileName());
-				}
-				return filesPresentations;
-			} else {
-				System.out.println("The directory is empty.");
-				throw new Exception("The directory is empty.");
-			}
-		} else {
-			System.out.println("The specified path is not a valid directory.");
-			throw new Exception("The specified path is not a valid directory.");
-		}
-	}
-	
-	
-	/*public String storeFile(MultipartFile file) {
-	String filename = StringUtils.cleanPath(file.getOriginalFilename());
-	try {
-		// Filename..txt
-		if (filename.contains("..")) {
-			throw new FileStorageException(
-					"Sorry! Filename contains invalid path sequence " + filename);
-		}
-		Path targetLocation = this.fileStorageLocation.resolve(filename);
-		Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-
-		compressFile(filename, targetLocation);
-		
-		return filename;
-	} catch (Exception e) {
-		throw new FileStorageException(
-				"Could not store file " + filename + ". Please try again!", e);
-	}
-}*/
 }

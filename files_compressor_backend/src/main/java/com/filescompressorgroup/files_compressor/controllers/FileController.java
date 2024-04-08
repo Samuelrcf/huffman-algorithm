@@ -1,9 +1,7 @@
 package com.filescompressorgroup.files_compressor.controllers;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -11,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -124,6 +123,20 @@ public class FileController {
 						"attachment; filename=\"" + resource.getFilename() + "\"")
 				.body(resource);
 	}
+	
+	
+	@GetMapping("/findAllCompressedFiles")
+	public ResponseEntity<List<FilePresentation>> findAllCompressedFiles() throws Exception {
+		List<FilePresentation> filesPresentations = service.findAllCompressedFiles();
+		return new ResponseEntity<List<FilePresentation>>(filesPresentations, HttpStatus.OK);
+	}
+	
+	@DeleteMapping("/{filename}")
+	public ResponseEntity<Void> delete(@PathVariable String filename) throws Exception {
+		service.deleteCompressedFile(filename);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+	
 	/*@GetMapping("/downloadFile/{filename:.+}")
 	public ResponseEntity<Resource> downloadFile(
 			@PathVariable String filename, HttpServletRequest request) {
@@ -152,13 +165,6 @@ public class FileController {
 				.body(resource);
 	}*/
 
-	@GetMapping("/findAllFiles")
-	public ResponseEntity<List<FilePresentation>> findAll() throws Exception {
-		List<FilePresentation> filesPresentations = service.findAll();
-		return new ResponseEntity<List<FilePresentation>>(filesPresentations, HttpStatus.OK);
-	}
-	
-	
 	/*@PostMapping("/compressMultipleFiles")
 	public List<UploadFileResponseDTO> compressMultipleFiles(
 			@RequestParam("files") MultipartFile[] files) {
