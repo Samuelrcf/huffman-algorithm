@@ -21,13 +21,13 @@ public class ReadingFiles {
 
 	public static String readFileBinary(String filePath) throws IOException {
 		try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(filePath))) {
-			int padding = inputStream.read(); // Lê o byte de preenchimento
+			int padding = inputStream.read(); // lê o byte de preenchimento
 			StringBuilder content = new StringBuilder();
 			int byteRead;
 			while ((byteRead = inputStream.read()) != -1) {
 				content.append(byteToBitString(byteRead));
 			}
-			// Remove os bits extras se houver
+			// remove os bits extras, se houver
 			if (padding > 0) {
 				content.delete(content.length() - padding, content.length());
 			}
