@@ -72,31 +72,31 @@ public class HuffmanCompression {
 	    }
 	}
 
-	public static HashMap<Character, String> buildHuffmanCodes(Node raiz) {
+	public static HashMap<Character, String> buildHuffmanCodesStart(Node raiz) {
 		HashMap<Character, String> huffmanCodes = new HashMap<>();
-		buildHuffmanCodesHelper(raiz, "", huffmanCodes);
+		buildHuffmanCodes(raiz, "", huffmanCodes);
 		return huffmanCodes;
 	}
 
-	private static void buildHuffmanCodesHelper(Node node, String code, HashMap<Character, String> huffmanCodes) {
-		if (node == null) {
+	private static void buildHuffmanCodes(Node node, String code, HashMap<Character, String> huffmanCodes) {
+		if (node == null) { 
 			return;
 		}
 
 		// se o nó for uma folha, adiciona o caractere e seu código ao mapa
 		if (node.getLeft() == null && node.getRight() == null) { // verifica se é terminal
 			huffmanCodes.put(node.getCharacter(), code); // quando achar um nó terminal, adiciona
-		}
+		} // o huffmanCodes serve para armazenar o código cada vez que ele encontrar um terminal
 
 		// constroi os códigos para a subárvore esquerda e direita
-		buildHuffmanCodesHelper(node.getLeft(), code + "0", huffmanCodes);
-		buildHuffmanCodesHelper(node.getRight(), code + "1", huffmanCodes);
+		buildHuffmanCodes(node.getLeft(), code + "0", huffmanCodes); //toda vida que mover para a esquerda, adiciona um 0
+		buildHuffmanCodes(node.getRight(), code + "1", huffmanCodes); //toda vida que mover para a direita, adiciona um 1
 	}
 
 	public static String encode(String input, HashMap<Character, String> huffmanCodes) {
 		StringBuilder encodedString = new StringBuilder();
 
-		// codifica cada caractere na entrada usando a tabela de códigos de Huffman
+		// obtém cada caractere do arquivo e codifica de acordo com a tabela de códigos de Huffman
 		for (char c : input.toCharArray()) {
 			encodedString.append(huffmanCodes.get(c)); // cocatena os codigos de cada caractere de acordo com a chave c
 		}

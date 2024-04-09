@@ -20,7 +20,7 @@ public class FileEnconding {
 		Node root = HuffmanCompression.buildHuffmanTree(frequencyMap);
 
 		// constrói a tabela de códigos de Huffman
-		HashMap<Character, String> huffmanCodes = HuffmanCompression.buildHuffmanCodes(root);
+		HashMap<Character, String> huffmanCodes = HuffmanCompression.buildHuffmanCodesStart(root);
 
 		// codifica a entrada original
 		String encodedString = HuffmanCompression.encode(input, huffmanCodes);

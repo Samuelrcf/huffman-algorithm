@@ -2,7 +2,7 @@ package com.filescompressorgroup.files_compressor.filecompressor.entities;
 
 import java.io.Serializable;
 
-public class Node implements Comparable<Node>, Serializable {
+public class Node implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private char character;
@@ -14,11 +14,6 @@ public class Node implements Comparable<Node>, Serializable {
 		this.frequency = frequency;
 		left = null;
 		right = null;
-	}
-
-	@Override
-	public int compareTo(Node node) {
-		return this.frequency - node.frequency;
 	}
 
 	public char getCharacter() {
