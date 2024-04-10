@@ -16,6 +16,7 @@
           counter
           multiple
           bg-color="var(--secondary-color)"
+          accept=".txt,.bin"
         >
           <template v-slot:selection="{ fileNames }">
             <template v-for="(fileName, index) in fileNames" :key="fileName">
@@ -90,6 +91,10 @@ const props = defineProps({
     required: true,
     type: String as PropType<string>,
   },
+  findAllCompressedFiles: {
+    required: true,
+    type: Function as PropType<() => void>,
+  },
 });
 
 const files = ref([]);
@@ -100,6 +105,7 @@ const sendFiles = async () => {
     console.log("O nome de compressedFile é: " + compressedFile.fileName);
     if (compressedFile.fileName != "") {
       downloadCompressedFile(compressedFile);
+      props.findAllCompressedFiles();
     }
   }
 

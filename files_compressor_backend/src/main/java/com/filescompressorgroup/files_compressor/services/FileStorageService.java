@@ -37,8 +37,8 @@ public class FileStorageService {
 	@Autowired
 	public FileStorageService(FileStorageConfig fileStorageConfig) {
 		Path path = Paths.get(fileStorageConfig.getUploadDir()).toAbsolutePath().normalize();
-		Path compressedPath = Paths.get("C:/FilesFinancesManagerED/CompressedFiles").toAbsolutePath().normalize();
-		Path decodedPath = Paths.get("C:/FilesFinancesManagerED/DecodedFiles").toAbsolutePath().normalize();
+		Path compressedPath = Paths.get("C:/FilesCompressorED/CompressedFiles").toAbsolutePath().normalize();
+		Path decodedPath = Paths.get("C:/FilesCompressorED/DecompressedFiles").toAbsolutePath().normalize();
 
 		this.fileStorageLocation = path;
 		this.compressedFileStorageLocation = compressedPath;
@@ -63,6 +63,9 @@ public class FileStorageService {
 			Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
 			String compressedFilename = compressFile(filename, targetLocation);
+			
+			// deleta o arquivo que o usuário mandou, para não gastar espaço no servidor
+			deleteOriginalFile(filename);
 
 			return compressedFilename;
 		} catch (Exception e) {
@@ -216,9 +219,24 @@ public class FileStorageService {
 		
 		return false;
 	}
+	
+	
+	public boolean deleteOriginalFile(String filename) throws Exception {
+		File folder = new File(this.fileStorageLocation.toString());
+		
+		File foundedFile = findFileByFilename(folder, filename);
+		
+		if(foundedFile != null) {
+            if (foundedFile.delete()) {
+                return true;
+            }
+		}
+		
+		return false;
+	}
 
 	public String compressFile(String filename, Path targetLocation) throws IOException {
-		String encodedBinaryFilePath = "C:/FilesFinancesManagerED/CompressedFiles/";
+		String encodedBinaryFilePath = "C:/FilesCompressorED/CompressedFiles/";
 
 		String onlyFilename = getFileNameOnly(filename);
 
@@ -242,7 +260,7 @@ public class FileStorageService {
 		System.out.println("onlyFilename em decompressFile: " + onlyFilename);
 
 		// decodificando o arquivo e colocando o .txt
-		String decodePathDestination = "C:/FilesFinancesManagerED/DecodedFiles/" + onlyFilename + ".txt";
+		String decodePathDestination = "C:/FilesCompressorED/DecompressedFiles/" + onlyFilename + ".txt";
 
 		Path decodedFilePath = this.decodedFileStorageLocation.resolve(decodePathDestination).normalize();
 
@@ -261,7 +279,7 @@ public class FileStorageService {
 
 	public void serializeNodeRoot(Node root, String onlyFilename) {
 		try {
-			String fullFileName = "C:/FilesFinancesManagerED/SerializedObjects/Root" + onlyFilename + ".ser";
+			String fullFileName = "C:/FilesCompressorED/SerializedObjects/Root" + onlyFilename + ".ser";
 			System.out.println("Path do root: " + fullFileName);
 
 			FileOutputStream fileOut = new FileOutputStream(fullFileName);
@@ -280,7 +298,7 @@ public class FileStorageService {
 	public Node desearializeNodeRoot(String onlyFilename) throws Exception {
 		try {
 			FileInputStream fileIn = new FileInputStream(
-					"C:/FilesFinancesManagerED/SerializedObjects/Root" + onlyFilename + ".ser");
+					"C:/FilesCompressorED/SerializedObjects/Root" + onlyFilename + ".ser");
 			ObjectInputStream in = new ObjectInputStream(fileIn);
 			Node root = (Node) in.readObject();
 			in.close();

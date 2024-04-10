@@ -10,6 +10,7 @@
           :title="compressFiles"
           :buttonText="compressFiles"
           :action="compressAction"
+          :findAllCompressedFiles="findAllCompressedFiles"
         />
       </v-window-item>
 
@@ -18,6 +19,7 @@
           :title="descompressFiles"
           :buttonText="descompressFiles"
           :action="decompressAction"
+          :findAllCompressedFiles="findAllCompressedFiles"
         />
       </v-window-item>
     </v-window>
@@ -103,6 +105,7 @@ const findAllCompressedFiles = async () => {
       }
     );
     console.log(response.data[0]);
+    allFiles.splice(0);
     allFiles.push(...response.data);
   } catch (error) {
     console.error("Error:", error);
@@ -169,12 +172,13 @@ async function deleteCompressedFile(item: FileInfoInterface) {
     );
     if (response.status === 204) {
       // Filtra os arquivos, removendo o arquivo excluído
-      let newFilesList = allFiles.filter(
+      /*let newFilesList = allFiles.filter(
         (file) => file.fileName !== item.fileName
       );
 
       allFiles.splice(0);
-      newFilesList.forEach((file) => allFiles.push(file));
+      newFilesList.forEach((file) => allFiles.push(file));*/
+      findAllCompressedFiles();
     }
   } catch (error) {
     console.error("Error:", error);

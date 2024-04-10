@@ -30,4 +30,4 @@ springdoc:
 cors:
   originPatterns: http://localhost:5173
 file:
-    upload-dir: C:\FilesFinancesManagerED\Files
+    upload-dir: C:\FilesCompressorED\Files

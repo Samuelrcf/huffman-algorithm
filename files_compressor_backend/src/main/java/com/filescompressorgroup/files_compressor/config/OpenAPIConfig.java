@@ -14,9 +14,9 @@ public class OpenAPIConfig {
 	OpenAPI customOpenAPI() {
 		return new OpenAPI()
 				.info(new Info()
-						.title("Finances Manager")
+						.title("Compactador e Descompactador de Arquivos")
 						.version("v1")
-						.description("API para gerenciamento de finanças")
+						.description("API para compactar e descompactar arquivos")
 						.termsOfService("Termos")
 						.license(
 								new License()
